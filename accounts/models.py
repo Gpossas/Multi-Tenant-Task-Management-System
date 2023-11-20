@@ -16,7 +16,6 @@ class TeamManager(models.Manager):
             username=username,
             password=password,
             team=team,
-            role='owner',
             is_staff=True,
         )
 
@@ -53,7 +52,7 @@ class Role:
 class User( AbstractUser ):
     id = models.UUIDField( primary_key=True, default=uuid.uuid4, editable=False )
     team = models.ForeignKey( Team, related_name='users', on_delete=models.CASCADE, editable=False )
-    role=models.CharField( max_length=20, choices=Role.roles, default='trainee' )
+    # role=models.CharField( max_length=20, choices=Role.roles, default='trainee' )
 
     class Meta:
         db_table = 'users'
