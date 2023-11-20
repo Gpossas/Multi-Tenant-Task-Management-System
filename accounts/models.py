@@ -26,6 +26,7 @@ class TeamManager(models.Manager):
 class Team( models.Model ):
     id = models.UUIDField( primary_key=True, default=uuid.uuid4, editable=False )
     name = models.CharField( 'name', max_length=100, unique=True )
+    created = models.DateTimeField(auto_now_add=True)
 
     objects = TeamManager()
 
