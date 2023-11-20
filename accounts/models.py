@@ -6,7 +6,7 @@ class TeamManager(models.Manager):
     """Manager for the Team model. Also handles the account creation"""
 
     @transaction.atomic
-    def create_team( self, company_name, username, password ):
+    def create_account( self, company_name, username, password ):
         """Creates a Team along with the User(with staff permission) and returns them both"""
 
         team = Team( name=company_name )
