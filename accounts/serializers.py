@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.models import Team
+from accounts.models import Team, Tenant
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -28,28 +28,37 @@ class UserSerializer( serializers.ModelSerializer ):
 
 
 
+class TenantSerializer( serializers.ModelSerializer ):
+    class Meta:
+        model = Tenant
+        fields = ( 'id', 'name' )
+
+
 class TeamSerializer( serializers.ModelSerializer ):
+    tenant = TenantSerializer()
+    user = UserSerializer()
+
     class Meta:
         model = Team
-        fields = ( 'id', 'name', 'created' )
+        field = ( 'id', 'tenant', 'user' )
 
 
-class AccountSerializer( serializers.Serializer ):
-    team = TeamSerializer()
-    user = UserSerializer()
+# class AccountSerializer( serializers.Serializer ):
+#     team = TeamSerializer()
+#     user = UserSerializer()
     
-    def create( self, validated_data ):
-        team_data = validated_data['team']
-        user_data = validated_data['user']
+#     def create( self, validated_data ):
+#         team_data = validated_data['team']
+#         user_data = validated_data['user']
 
-        # Call our CompanyManager method to create the Team and the User
-        team, user = Team.objects.create_account(
-            team_name=team_data.get( 'name' ),
-            username=user_data.get( 'username' ),
-            password=user_data.get( 'password' ),
-        )
+#         # Call our CompanyManager method to create the Team and the User
+#         team, user = Team.objects.create_account(
+#             team_name=team_data.get( 'name' ),
+#             username=user_data.get( 'username' ),
+#             password=user_data.get( 'password' ),
+#         )
 
-        return { 'team': team, 'user': user }
+#         return { 'team': team, 'user': user }
     
-    def update( self, instance, validated_data ):
-        raise NotImplementedError( 'Cannot call update() on an account' )
+#     def update( self, instance, validated_data ):
+#         raise NotImplementedError( 'Cannot call update() on an account' )
