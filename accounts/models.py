@@ -2,14 +2,14 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
 
-class TeamManager(models.Manager):
+class TeamManager( models.Manager ):
     """Manager for the Team model. Also handles the account creation"""
 
     @transaction.atomic
-    def create_account( self, company_name, username, password ):
+    def create_account( self, team_name, username, password ):
         """Creates a Team along with the User(with staff permission) and returns them both"""
 
-        team = Team( name=company_name )
+        team = Team( name=team_name )
         team.save()
 
         user = User.objects.create_user(
@@ -52,7 +52,6 @@ class Role:
 class User( AbstractUser ):
     id = models.UUIDField( primary_key=True, default=uuid.uuid4, editable=False )
     team = models.ForeignKey( Team, related_name='users', on_delete=models.CASCADE, editable=False )
-    # role=models.CharField( max_length=20, choices=Role.roles, default='trainee' )
 
     class Meta:
         db_table = 'users'
