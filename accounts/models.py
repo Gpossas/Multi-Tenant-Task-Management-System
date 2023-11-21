@@ -16,18 +16,6 @@ from django.db import models, transaction
 #     def add_role( cls, role ):
 #         return cls.roles.append( role )
 
-
-class Tenant( models.Model ):
-    id = models.UUIDField( primary_key=True, default=uuid.uuid4, editable=False )
-    name = models.CharField( max_length=25, unique=True )
-
-    class Meta:
-        db_table = 'tenants'
-
-    def __str__( self ):
-        return self.name
-
-
 class User( AbstractUser ):
     id = models.UUIDField( primary_key=True, default=uuid.uuid4, editable=False )
 
@@ -36,12 +24,24 @@ class User( AbstractUser ):
 
     def __str__( self ):
         return self.username
+    
+
+class Tenant( models.Model ):
+    id = models.UUIDField( primary_key=True, default=uuid.uuid4, editable=False )
+    name = models.CharField( max_length=25, unique=True )
+    owner = models.ForeignKey( User, related_name='tenants', on_delete=models.SET_NULL, null=True )
+
+    class Meta:
+        db_table = 'tenants'
+
+    def __str__( self ):
+        return self.name
 
 
 class Team( models.Model ):
     created = models.DateTimeField( auto_now_add=True )
     tenant = models.ForeignKey( Tenant, related_name='team', on_delete=models.CASCADE )
-    user = models.ForeignKey( User, related_name='team', on_delete=models.CASCADE )
+    user = models.ForeignKey( User, related_name='team', on_delete=models.SET_NULL, null=True )
 
     class Meta:
         db_table = 'teams'
