@@ -29,9 +29,11 @@ class UserSerializer( serializers.ModelSerializer ):
 
 
 class TenantSerializer( serializers.ModelSerializer ):
+    owner = UserSerializer( read_only=True )
+
     class Meta:
         model = Tenant
-        fields = ( 'id', 'name' )
+        fields = ( 'id', 'name', 'owner' )
 
 
 class TeamSerializer( serializers.ModelSerializer ):
