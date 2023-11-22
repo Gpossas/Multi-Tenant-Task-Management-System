@@ -35,6 +35,25 @@ class TenantSerializer( serializers.ModelSerializer ):
         model = Tenant
         fields = ( 'id', 'name', 'owner' )
 
+    def create( self, validated_data ):
+        tenant_name: str = validated_data['name']
+        owner: User = validated_data['owner']
+
+        tenant = Tenant.objects.create_tenant(
+            tenant_name = tenant_name, 
+            user = owner
+        )
+
+        return tenant
+    
+    # TODO: update name of tenant maintaining data integrity
+    def update( self, instance, validated_data ):
+        new_name = Tenant.objects.filter( name=validated_data['name'] ) 
+        if new_name:
+            raise Tenant.FieldError( 'Name already in use' )
+        instance.name = validated_data['name']
+        return instance
+        
 
 class TeamSerializer( serializers.ModelSerializer ):
     tenant = TenantSerializer()
@@ -43,24 +62,3 @@ class TeamSerializer( serializers.ModelSerializer ):
     class Meta:
         model = Team
         field = ( 'id', 'tenant', 'user' )
-
-
-# class AccountSerializer( serializers.Serializer ):
-#     team = TeamSerializer()
-#     user = UserSerializer()
-    
-#     def create( self, validated_data ):
-#         team_data = validated_data['team']
-#         user_data = validated_data['user']
-
-#         # Call our CompanyManager method to create the Team and the User
-#         team, user = Team.objects.create_account(
-#             team_name=team_data.get( 'name' ),
-#             username=user_data.get( 'username' ),
-#             password=user_data.get( 'password' ),
-#         )
-
-#         return { 'team': team, 'user': user }
-    
-#     def update( self, instance, validated_data ):
-#         raise NotImplementedError( 'Cannot call update() on an account' )
