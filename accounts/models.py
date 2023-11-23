@@ -56,8 +56,8 @@ class Tenant( models.Model ):
 
 class Team( models.Model ):
     created = models.DateTimeField( auto_now_add=True )
-    tenant = models.ForeignKey( Tenant, related_name='team', on_delete=models.CASCADE )
-    user = models.ForeignKey( User, related_name='team', on_delete=models.SET_NULL, null=True )
+    tenant = models.ForeignKey( Tenant, related_name='teams', on_delete=models.CASCADE )
+    user = models.ForeignKey( User, related_name='teams', on_delete=models.SET_NULL, null=True )
 
     class Meta:
         db_table = 'teams'
