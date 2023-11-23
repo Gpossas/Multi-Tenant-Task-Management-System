@@ -9,6 +9,7 @@ from .permissions import IsInCommonTeamOrIsUser
 
 User = get_user_model()
 
+# ========== USER VIEWS ==========
 
 class CreateUser( APIView ):
 
@@ -56,6 +57,7 @@ class UserDetail( APIView ):
         user.delete()
         return Response( serialized.data, status=status.HTTP_202_ACCEPTED )
     
+# ========== TENANTS VIEWS ==========
 
 class CreateTenant( APIView ):
     permission_classes = [IsAuthenticated]
