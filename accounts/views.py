@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from .permissions import IsInCommonTeamOrIsUser
+from .permissions import IsInCommonTeam, IsUser
 
 User = get_user_model()
 
@@ -24,7 +24,7 @@ class CreateUser( APIView ):
 class UserDetail( APIView ):
     # IsInCommonTeamOrIsUser will block unauthenticated users as IsAuthenticated.
     # To save computational resources by not hitting the database, it's preferable to block unauthenticated users earlier.
-    permission_classes = ( IsAuthenticated, IsInCommonTeamOrIsUser )
+    permission_classes = ( IsAuthenticated, IsInCommonTeam|IsUser )
 
     def get( self, request, username ):
         """Get user data"""

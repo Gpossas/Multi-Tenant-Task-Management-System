@@ -26,12 +26,12 @@ class IsUserOrReadOnly( permissions.BasePermission ):
         # Instance must have an attribute named `owner`.
         return instance_user == request.user
 
-
-class IsInCommonTeamOrIsUser( permissions.BasePermission ):
+class IsUser( permissions.BasePermission ):
     def has_object_permission( self, request, view, obj ):
-        if obj == request.user:
-            return True
-        
+        return obj == request.user
+
+class IsInCommonTeam( permissions.BasePermission ):
+    def has_object_permission( self, request, view, obj ): 
         my_teams = request.user.teams.all()
         requested_user_teams = obj.teams.all()
 
