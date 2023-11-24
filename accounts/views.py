@@ -74,6 +74,24 @@ class CreateTenant( APIView ):
 class TeamDetail( APIView ):
     permission_classes = ( IsAuthenticated, IsInTeam )
     
+    def get( self, request, team_name ):
+        """Get information about a team and its members"""
+
+        tenant = get_object_or_404( Tenant, name=team_name )
+        self.check_object_permissions( request, tenant )
+
+        tenant_serialized = TenantSerializer( tenant )
+        users_query_serialized = UserSerializer( [team.user for team in tenant.team.all()] , many=True )
+        
+        return Response( 
+            { 
+                'team': tenant_serialized.data,
+                'users': users_query_serialized.data
+            }, 
+            status=status.HTTP_200_OK 
+        )
+    
+
     def post( self, request, team_name ):
         """Join a user to a team. Must be someone in the team to add users"""
 
