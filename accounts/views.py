@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, TenantSerializer
+from .serializers import UserSerializer, TenantSerializer, TeamSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -74,7 +74,6 @@ class CreateTenant( APIView ):
 class TeamDetail( APIView ):
     permission_classes = ( IsAuthenticated, IsInTeam )
     
-    #TODO: return tenant and new_member data in response
     def post( self, request, team_name ):
         """Join a user to a team. Must be someone in the team to add users"""
 
@@ -82,5 +81,6 @@ class TeamDetail( APIView ):
         self.check_object_permissions( request, tenant )
         new_member = get_object_or_404( User, username=request.data['username'] )
 
-        Team.objects.create( tenant=tenant, user=new_member )
-        return Response( status=status.HTTP_201_CREATED )
+        team = Team.objects.create( tenant=tenant, user=new_member )
+        serialized = TeamSerializer( team )
+        return Response( serialized.data, status=status.HTTP_201_CREATED )
