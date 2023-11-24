@@ -36,3 +36,9 @@ class IsInCommonTeam( permissions.BasePermission ):
         requested_user_teams = obj.teams.all()
 
         return my_teams.filter( pk__in=requested_user_teams.values_list( 'pk', flat=True ) ).exists()
+    
+
+class IsInTeam( permissions.BasePermission ):
+    def has_object_permission( self, request, view, tenant ): 
+        user_teams = request.user.teams.all()
+        return user_teams.filter( tenant=tenant ).exists()
