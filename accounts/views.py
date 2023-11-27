@@ -72,11 +72,11 @@ class TeamList( APIView ):
 
     def post( self, request ):
         """
-        Create a team. 
+        Create a team.
         Optional: populate team with members
         """
 
-        members_to_add = [ User.objects.get( username=member ) for member in request.data.get( 'members' )]      
+        members_to_add = [ get_object_or_404( User, username=member ) for member in request.data.get( 'members' ) ]  
         team_serialized = TeamSerializer( data=request.data, context={ 'captain': request.user, 'members': members_to_add } )
 
         if team_serialized.is_valid():
