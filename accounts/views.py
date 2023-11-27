@@ -1,12 +1,12 @@
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, TenantSerializer, TeamSerializer
+from .serializers import UserSerializer, TeamSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .permissions import IsInCommonTeam, IsUser, IsInTeam
-from .models import Tenant, Team
+from .models import Team
 
 User = get_user_model()
 
@@ -58,18 +58,32 @@ class UserDetail( APIView ):
         user.delete()
         return Response( serialized.data, status=status.HTTP_202_ACCEPTED )
     
-# ========== TENANTS VIEWS ==========
 
-class CreateTenant( APIView ):
-    permission_classes = [IsAuthenticated]
-    
+class TeamList( APIView ):
+    permission_classes = ( IsAuthenticated, )
+
+    def get( self, request ):
+        """Shows all the teams the user is on"""
+
+        user_teams = request.user.teams.all()
+        teams_serilized = TeamSerializer( user_teams, many=True )
+        return Response( teams_serilized.data, status=status.HTTP_200_OK )
+
+
     def post( self, request ):
-        deserialized_tenant = TenantSerializer( data=request.data )
-        if deserialized_tenant.is_valid():
-            deserialized_tenant.save( owner=request.user )
-            return Response( deserialized_tenant.data, status=status.HTTP_201_CREATED )
-        return Response( deserialized_tenant.errors, status=status.HTTP_400_BAD_REQUEST )
-    
+        """
+        Create a team. 
+        Optional: populate team with members
+        """
+
+        members_to_add = [ User.objects.get( username=member ) for member in request.data.get( 'members' )]      
+        team_serialized = TeamSerializer( data=request.data, context={ 'captain': request.user, 'members': members_to_add } )
+
+        if team_serialized.is_valid():
+            team_serialized.save( members=members_to_add )
+            return Response( team_serialized.data, status=status.HTTP_201_CREATED )
+        return Response( team_serialized.errors, status=status.HTTP_400_BAD_REQUEST )
+
 
 class TeamDetail( APIView ):
     permission_classes = ( IsAuthenticated, IsInTeam )
@@ -77,28 +91,20 @@ class TeamDetail( APIView ):
     def get( self, request, team_name ):
         """Get information about a team and its members"""
 
-        tenant = get_object_or_404( Tenant, name=team_name )
-        self.check_object_permissions( request, tenant )
+        team = get_object_or_404( Team, name=team_name )
+        self.check_object_permissions( request, team )
 
-        tenant_serialized = TenantSerializer( tenant )
-        users_query_serialized = UserSerializer( [team.user for team in tenant.team.all()] , many=True )
-        
-        return Response( 
-            { 
-                'team': tenant_serialized.data,
-                'users': users_query_serialized.data
-            }, 
-            status=status.HTTP_200_OK 
-        )
+        team_serialized = TeamSerializer( team )
+        return Response( team_serialized.data, status=status.HTTP_200_OK )
     
 
     def post( self, request, team_name ):
         """Join a user to a team. Must be someone in the team to add users"""
 
-        tenant = get_object_or_404( Tenant, name=team_name )
-        self.check_object_permissions( request, tenant )
+        team = get_object_or_404( Team, name=team_name )
+        self.check_object_permissions( request, team )
         new_member = get_object_or_404( User, username=request.data['username'] )
 
-        team = Team.objects.create( tenant=tenant, user=new_member )
+        team.members.add( new_member )
         serialized = TeamSerializer( team )
         return Response( serialized.data, status=status.HTTP_201_CREATED )
