@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.models import Team, Tenant
+from accounts.models import Team
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -24,41 +24,30 @@ class UserSerializer( serializers.ModelSerializer ):
         if 'password' in validated_data:
             updated.set_password( validated_data['password'] )
             updated.save()
-        return updated
-
-
-
-class TenantSerializer( serializers.ModelSerializer ):
-    owner = UserSerializer( read_only=True )
-
-    class Meta:
-        model = Tenant
-        fields = ( 'id', 'name', 'owner' )
-
-    def create( self, validated_data ):
-        tenant_name: str = validated_data['name']
-        owner: User = validated_data['owner']
-
-        tenant = Tenant.objects.create_tenant(
-            tenant_name = tenant_name, 
-            user = owner
-        )
-
-        return tenant
-    
-    # TODO: update name of tenant maintaining data integrity
-    def update( self, instance, validated_data ):
-        new_name = Tenant.objects.filter( name=validated_data['name'] ) 
-        if new_name:
-            raise Tenant.FieldError( 'Name already in use' )
-        instance.name = validated_data['name']
-        return instance
+        return updated  
         
 
 class TeamSerializer( serializers.ModelSerializer ):
-    tenant = TenantSerializer()
-    user = UserSerializer()
+    members = UserSerializer( many=True, read_only=True )
 
     class Meta:
         model = Team
-        fields = ( 'id', 'tenant', 'user', 'created' )
+        fields = ( 'id', 'name', 'members', 'created' )
+
+    def create( self, validated_data ):
+        team = Team.objects.create( name = validated_data['name'] )
+        team.save()
+        team.members.add( self.context['captain'] )
+
+        if self.context.get( 'members' ):
+            members = validated_data['members']
+            for member in members:
+                team.members.add( User.objects.get( username = member ) )
+        
+        return team
+    
+    def update( self, instance, validated_data ):
+        new_members = validated_data['new_members']
+
+        for new_member in new_members:
+            instance.members.add( User.objects.get( username=new_member ) )
