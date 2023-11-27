@@ -26,9 +26,16 @@ class IsUserOrReadOnly( permissions.BasePermission ):
         # Instance must have an attribute named `owner`.
         return instance_user == request.user
 
+
+class IsReadOnly( permissions.BasePermission ):
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS
+
+
 class IsUser( permissions.BasePermission ):
     def has_object_permission( self, request, view, obj ):
         return obj == request.user
+
 
 class IsInCommonTeam( permissions.BasePermission ):
     def has_object_permission( self, request, view, obj ): 
