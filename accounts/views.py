@@ -36,6 +36,22 @@ class UserDetail( APIView ):
         serialized = UserSerializer( user )
         return Response( serialized.data, status=status.HTTP_200_OK )
     
+    def put( self, request, username ):
+        """Edit user information"""
+
+        if 'password' in request.data:
+            return Response( { 'error': 'password update should be under POST method' }, status=status.HTTP_405_METHOD_NOT_ALLOWED )
+        
+        user = get_object_or_404( User, username=username )
+        self.check_object_permissions( request, user )
+        
+        user_serialized = UserSerializer( user, data=request.data, partial=True )
+        if user_serialized.is_valid():
+            user_serialized.save()
+            return Response( user_serialized.data, status=status.HTTP_202_ACCEPTED )
+        return Response( user_serialized.errors, status=status.HTTP_400_BAD_REQUEST )
+
+    
     def post( self, request, username ):
         """Redefine user password"""
 
