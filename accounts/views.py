@@ -124,3 +124,14 @@ class TeamDetail( APIView ):
         team.members.add( new_member )
         serialized = TeamSerializer( team )
         return Response( serialized.data, status=status.HTTP_201_CREATED )
+    
+
+    def delete( self, request, team_name ):
+        """Delete a team"""
+        # TODO: user should be the captain to delete a team
+
+        team = get_object_or_404( Team, name=team_name )
+        self.check_object_permissions( request, team )
+        team.delete()
+        team_serialized = TeamSerializer( team )
+        return Response( team_serialized.data, status=status.HTTP_202_ACCEPTED )
