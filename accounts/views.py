@@ -126,6 +126,19 @@ class TeamDetail( APIView ):
         return Response( serialized.data, status=status.HTTP_201_CREATED )
     
 
+    def patch( self, request, team_name ):
+        """Remove a member or leave a team"""
+        #TODO: only the captain can remove a member from the team.
+
+        member_to_remove = get_object_or_404( User, username=request.data.get( 'username' ) )
+        if request.user == member_to_remove: # or is captain
+            team = get_object_or_404( Team, name=team_name )
+            serialized_member_to_remove = UserSerializer( member_to_remove )
+            team.members.remove( member_to_remove )
+            return Response( serialized_member_to_remove.data, status=status.HTTP_202_ACCEPTED )
+        return Response( { 'error': 'must be captain to remove a member or be the member itself' } , status=status.HTTP_403_FORBIDDEN )
+    
+
     def delete( self, request, team_name ):
         """Delete a team"""
         # TODO: user should be the captain to delete a team
