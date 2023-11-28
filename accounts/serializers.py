@@ -39,9 +39,7 @@ class TeamSerializer( serializers.ModelSerializer ):
         fields = ( 'id', 'name', 'members', 'created' )
 
     def create( self, validated_data ):
-        team = Team.objects.create( name = validated_data['name'] )
-        team.save()
-        team.members.add( self.context['captain'] )
+        team = Team.objects.create_team( validated_data['name'], self.context['captain'] )
 
         if self.context.get( 'members' ):
             members = validated_data['members']
