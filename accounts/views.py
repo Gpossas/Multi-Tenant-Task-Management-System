@@ -75,6 +75,9 @@ class UserDetail( APIView ):
         return Response( serialized.data, status=status.HTTP_202_ACCEPTED )
     
 
+# ========== TEAM VIEWS ==========
+
+
 class TeamList( APIView ):
     permission_classes = ( IsAuthenticated, )
 
