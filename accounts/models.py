@@ -26,7 +26,7 @@ class TeamManager( models.Manager ):
 class Team( models.Model ):
     id = models.UUIDField( primary_key=True, default=uuid.uuid4, editable=False )
     name = models.CharField( max_length=30 )
-    members = models.ManyToManyField( User, related_name='teams' )
+    members = models.ManyToManyField( User, related_name='teams', through='TeamMembership' )
     created = models.DateTimeField( auto_now_add=True )
 
     objects = TeamManager()
@@ -36,3 +36,11 @@ class Team( models.Model ):
 
     def __str__( self ):
         return self.name
+    
+
+class TeamMembership( models.Model ):
+    team = models.ForeignKey( Team, on_delete=models.CASCADE )
+    member = models.ForeignKey( User, on_delete=models.CASCADE )
+
+    class Meta:
+        db_table = 'teams_membership'
