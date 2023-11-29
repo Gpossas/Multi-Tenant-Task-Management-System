@@ -8,9 +8,8 @@ class TeamManager( models.Manager ):
     @transaction.atomic
     def create_team( self, team_name, captain ):
         team = Team.objects.create( name=team_name )
-        team.save()
-        team.members.add( captain )
-        return team
+        TeamMembership.objects.create( team=team, member=captain, role=TeamMembership.Roles.CAPTAIN )
+        return team       
 
 
 class User( AbstractUser ):
@@ -39,8 +38,18 @@ class Team( models.Model ):
     
 
 class TeamMembership( models.Model ):
+    class Roles( models.TextChoices ):
+        CAPTAIN = 'C', 'Captain'
+        FIRST_MATE = 'FM', 'First mate'
+        MEMBER = 'M', 'Member'
+        
     team = models.ForeignKey( Team, on_delete=models.CASCADE )
     member = models.ForeignKey( User, on_delete=models.CASCADE )
+    role = models.CharField(
+        max_length=2,
+        choices=Roles.choices,
+        default=Roles.MEMBER
+    )
 
     class Meta:
-        db_table = 'teams_membership'
+        db_table = 'teams_membership' 
