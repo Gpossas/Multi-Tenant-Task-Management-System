@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from .models import TeamMembership
 
 class IsOwnerOrReadOnly( permissions.BasePermission ):
     """
@@ -49,3 +50,13 @@ class IsInTeam( permissions.BasePermission ):
     def has_object_permission( self, request, view, team ): 
         user_teams = request.user.teams.all()
         return user_teams.filter( name=team ).exists()
+    
+
+class IsCaptain( permissions.BasePermission ):
+    def has_object_permission( self, request, view, team ): 
+        return TeamMembership.objects.filter( team=team.id, member=request.user.id, role='C' ).exists()
+
+
+class IsFirstMate( permissions.BasePermission ):
+    def has_object_permission( self, request, view, team ): 
+        return TeamMembership.objects.filter( team=team.id, member=request.user.id, role='FM' ).exists()
