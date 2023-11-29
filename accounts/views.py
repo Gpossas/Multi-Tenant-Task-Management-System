@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from .permissions import IsInCommonTeam, IsUser, IsInTeam, IsReadOnly
+from .permissions import IsInCommonTeam, IsUser, IsInTeam, IsReadOnly, IsCaptain, IsFirstMate
 from .models import Team
 
 User = get_user_model()
@@ -105,7 +105,15 @@ class TeamList( APIView ):
 
 
 class TeamDetail( APIView ):
-    permission_classes = ( IsAuthenticated, IsInTeam )
+    def get_permissions(self):
+        if self.request.method in ( 'POST', 'PATCH' ):
+            self.permission_classes = ( IsAuthenticated, IsInTeam, IsCaptain|IsFirstMate )
+        elif self.request.method in ( 'DELETE' ):
+            self.permission_classes = ( IsAuthenticated, IsInTeam, IsCaptain )
+        else:
+            self.permission_classes = ( IsAuthenticated, IsInTeam )
+        return super( TeamDetail, self ).get_permissions()
+    
     
     def get( self, request, team_name ):
         """Get information about a team and its members"""
@@ -118,7 +126,7 @@ class TeamDetail( APIView ):
     
 
     def post( self, request, team_name ):
-        """Join a user to a team. Must be someone in the team to add users"""
+        """Join a user to a team or add a member to the team( must be captain or first mate )"""
 
         team = get_object_or_404( Team, name=team_name )
         self.check_object_permissions( request, team )
@@ -131,7 +139,6 @@ class TeamDetail( APIView ):
 
     def patch( self, request, team_name ):
         """Remove a member or leave a team"""
-        #TODO: only the captain can remove a member from the team.
 
         member_to_remove = get_object_or_404( User, username=request.data.get( 'username' ) )
         if request.user == member_to_remove: # or is captain
@@ -144,7 +151,6 @@ class TeamDetail( APIView ):
 
     def delete( self, request, team_name ):
         """Delete a team"""
-        # TODO: user should be the captain to delete a team
 
         team = get_object_or_404( Team, name=team_name )
         self.check_object_permissions( request, team )
