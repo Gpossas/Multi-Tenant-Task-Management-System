@@ -148,6 +148,6 @@ class TeamDetail( APIView ):
 
         team = get_object_or_404( Team, name=team_name )
         self.check_object_permissions( request, team )
+        team_serialized_data = TeamSerializer( team ).data
         team.delete()
-        team_serialized = TeamSerializer( team )
-        return Response( team_serialized.data, status=status.HTTP_202_ACCEPTED )
+        return Response( team_serialized_data, status=status.HTTP_202_ACCEPTED )
