@@ -34,11 +34,13 @@ class IsReadOnly( permissions.BasePermission ):
 
 
 class IsUser( permissions.BasePermission ):
+    message = 'Must be the owner of the account to perform action'
     def has_object_permission( self, request, view, obj ):
         return obj == request.user
 
 
 class IsInCommonTeam( permissions.BasePermission ):
+    message = 'Must be in a common team to perform action'
     def has_object_permission( self, request, view, obj ): 
         my_teams = request.user.teams.all()
         requested_user_teams = obj.teams.all()
@@ -47,16 +49,19 @@ class IsInCommonTeam( permissions.BasePermission ):
     
 
 class IsInTeam( permissions.BasePermission ):
+    message = 'Must be in team to perform action'
     def has_object_permission( self, request, view, team ): 
         user_teams = request.user.teams.all()
         return user_teams.filter( name=team ).exists()
     
 
 class IsCaptain( permissions.BasePermission ):
+    message = 'Must be captain to perform action'
     def has_object_permission( self, request, view, team ): 
         return TeamMembership.objects.filter( team=team.id, member=request.user.id, role='C' ).exists()
 
 
 class IsFirstMate( permissions.BasePermission ):
+    message = 'Must be First mate to perform action'
     def has_object_permission( self, request, view, team ): 
         return TeamMembership.objects.filter( team=team.id, member=request.user.id, role='FM' ).exists()
