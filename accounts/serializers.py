@@ -40,6 +40,8 @@ class TeamSerializer( serializers.ModelSerializer ):
 
     def create( self, validated_data ):
         team = Team.objects.create_team( validated_data['name'], self.context['captain'] )
+        team.slug = team.name.replace( ' ', '-' ).lower()
+        team.save()
 
         if self.context.get( 'members' ):
             members = validated_data['members']

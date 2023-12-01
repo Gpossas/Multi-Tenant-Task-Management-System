@@ -23,8 +23,8 @@ class User( AbstractUser ):
     
 
 class Team( models.Model ):
-    id = models.UUIDField( primary_key=True, default=uuid.uuid4, editable=False )
     name = models.CharField( max_length=30 )
+    slug = models.SlugField()
     members = models.ManyToManyField( User, related_name='teams', through='TeamMembership' )
     created = models.DateTimeField( auto_now_add=True )
 
