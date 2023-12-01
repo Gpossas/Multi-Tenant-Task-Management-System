@@ -11,5 +11,5 @@ urlpatterns = [
 
     path( 'workspace', TeamList.as_view(), name='workspace' ),
     
-    path( 'team_detail/<str:team_name>', TeamDetail.as_view(), name='team_detail' ),
+    path( 'team_detail/<int:pk>/<slug:slug>', TeamDetail.as_view(), name='team_detail' ),
 ]

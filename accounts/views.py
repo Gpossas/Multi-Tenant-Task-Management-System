@@ -117,20 +117,20 @@ class TeamDetail( APIView ):
         return super( TeamDetail, self ).get_permissions()
     
     
-    def get( self, request, team_name ):
+    def get( self, request, pk, slug ):
         """Get information about a team and its members"""
 
-        team = get_object_or_404( Team, name=team_name )
+        team = get_object_or_404( Team, pk=pk )
         self.check_object_permissions( request, team )
 
         team_serialized = TeamSerializer( team )
         return Response( team_serialized.data, status=status.HTTP_200_OK )
     
 
-    def post( self, request, team_name ):
+    def post( self, request, pk, slug ):
         """Join a user to a team or add a member to the team ( must be captain or first mate )"""
 
-        team = get_object_or_404( Team, name=team_name )
+        team = get_object_or_404( Team, pk=pk )
         self.check_object_permissions( request, team )
         new_member = get_object_or_404( User, username=request.data['username'] )
 
@@ -139,11 +139,11 @@ class TeamDetail( APIView ):
         return Response( serialized.data, status=status.HTTP_201_CREATED )
     
 
-    def patch( self, request, team_name ):
+    def patch( self, request, pk, slug ):
         """Remove a member or leave a team"""
 
         member_to_remove = get_object_or_404( User, username=request.data.get( 'username' ) )
-        team = get_object_or_404( Team, name=team_name )
+        team = get_object_or_404( Team, pk=pk )
         if (
             request.user == member_to_remove or
             TeamMembership.objects.filter( team=team.id, member=request.user.id, role__in=('C', 'FM') ).exists()
@@ -157,10 +157,10 @@ class TeamDetail( APIView ):
         )
     
 
-    def delete( self, request, team_name ):
+    def delete( self, request, pk, slug ):
         """Delete a team"""
 
-        team = get_object_or_404( Team, name=team_name )
+        team = get_object_or_404( Team, pk=pk )
         self.check_object_permissions( request, team )
         team_serialized_data = TeamSerializer( team ).data
         team.delete()
