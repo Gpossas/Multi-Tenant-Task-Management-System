@@ -31,7 +31,7 @@ class UserDetailTestCase( TestCase ):
         pass
 
     def test_nonexistent_user( self ):
-        """Ensure user not found if user doesn't exist"""
+        """Ensure status 404 if user doesn't exist"""
 
         url = reverse( 'user_detail', args=['not_a_user'] )
         self.client.force_login( self.user )
@@ -51,8 +51,6 @@ class UserDetailTestCase( TestCase ):
 
     def test_get_user_signed_as_another_user( self ):
         pass # forbidden
-    def test_get_nonexistent_user( self ):
-        pass # 404
 
     # PUT METHOD
     def test_valid_data_edit( self ):
