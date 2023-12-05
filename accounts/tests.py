@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from .models import Team
+from .serializers import UserSerializer
 
 User = get_user_model()
 
@@ -13,7 +14,7 @@ class UserDetailTestCase( TestCase ):
         self.zoro = User.objects.create( username='zoro', first_name='Roronoa', last_name='Zoro', password='123' )
         self.sanji = User.objects.create( username='sanji', password='123' )
         self.ace = User.objects.create( username= 'ace', password='123' )
-        
+
         self.team = Team.objects.create_team( team_name='Straw Hat Pirates', captain=self.luffy )
         self.team.members.add( self.zoro )
         self.team.members.add( self.sanji )
@@ -72,8 +73,12 @@ class UserDetailTestCase( TestCase ):
         owner = Client()
         owner.force_login( self.luffy )
         url = reverse( 'user_detail', args=[self.luffy.username] )
-        get_response = owner.get( url )
-        self.assertEqual( status.HTTP_200_OK, get_response.status_code )
+        
+        response = owner.get( url )
+        self.assertEqual( status.HTTP_200_OK, response.status_code )
+
+        serialized_data = UserSerializer( self.luffy )
+        self.assertEqual( serialized_data.data, response.json() )
 
     def test_user_signed_as_another_user( self ):
         """Ensure access denied to any user that is not the owner of account"""
