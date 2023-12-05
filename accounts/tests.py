@@ -9,11 +9,14 @@ User = get_user_model()
 class UserDetailTestCase( TestCase ):
     def setUp( self ):
         self.client = Client()
-        self.user = User.objects.create( username='luffy', first_name='Monkey', last_name='D. Luffy', password='123' )
-        self.user2 = User.objects.create( username='zoro', first_name='Roronoa', last_name='Zoro', password='123' )
-        self.user3 = User.objects.create( username= 'ace', password='123' )
-        self.team = Team.objects.create_team( team_name='Straw Hat Pirates', captain=self.user )
-        self.team.members.add( self.user2 )
+        self.luffy = User.objects.create( username='luffy', first_name='Monkey', last_name='D. Luffy', password='123' )
+        self.zoro = User.objects.create( username='zoro', first_name='Roronoa', last_name='Zoro', password='123' )
+        self.sanji = User.objects.create( username='sanji', password='123' )
+        self.ace = User.objects.create( username= 'ace', password='123' )
+        
+        self.team = Team.objects.create_team( team_name='Straw Hat Pirates', captain=self.luffy )
+        self.team.members.add( self.zoro )
+        self.team.members.add( self.sanji )
 
 
     def test_unauthenticated_user_forbidden( self ):
@@ -37,7 +40,7 @@ class UserDetailTestCase( TestCase ):
         """Ensure access denied for each method to users not in team"""
         
         not_member = Client()
-        not_member.force_login( self.user3 )
+        not_member.force_login( self.ace )
 
         url = reverse( 'user_detail', args=['luffy'] )
 
@@ -57,7 +60,7 @@ class UserDetailTestCase( TestCase ):
         """Ensure status 404 if user doesn't exist"""
 
         url = reverse( 'user_detail', args=['not_a_user'] )
-        self.client.force_login( self.user )
+        self.client.force_login( self.luffy )
 
         response = self.client.get( url )
         self.assertEqual( status.HTTP_404_NOT_FOUND, response.status_code )
@@ -67,8 +70,8 @@ class UserDetailTestCase( TestCase ):
         """Test valid access to owner account detail"""
 
         owner = Client()
-        owner.force_login( self.user )
-        url = reverse( 'user_detail', args=[self.user.username] )
+        owner.force_login( self.luffy )
+        url = reverse( 'user_detail', args=[self.luffy.username] )
         get_response = owner.get( url )
         self.assertEqual( status.HTTP_200_OK, get_response.status_code )
 
@@ -76,7 +79,7 @@ class UserDetailTestCase( TestCase ):
         """Ensure access denied to any user that is not the owner of account"""
 
         url = reverse( 'user_detail', args=['zoro'] )
-        self.client.force_login( self.user )
+        self.client.force_login( self.luffy )
 
         get_response = self.client.get( url )
         post_response = self.client.post( url )
