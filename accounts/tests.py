@@ -32,7 +32,7 @@ class UserDetailTestCase( TestCase ):
 
     def test_nonexistent_user( self ):
         """Ensure user not found if user doesn't exist"""
-        
+
         url = reverse( 'user_detail', args=['not_a_user'] )
         self.client.force_login( self.user )
 
@@ -49,8 +49,6 @@ class UserDetailTestCase( TestCase ):
         get_response = owner.get( url )
         self.assertEqual( status.HTTP_200_OK, get_response.status_code )
 
-    def test_get_user_unsigned( self ):
-        pass # forbidden
     def test_get_user_signed_as_another_user( self ):
         pass # forbidden
     def test_get_nonexistent_user( self ):
