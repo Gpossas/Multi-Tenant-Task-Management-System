@@ -50,12 +50,21 @@ class UserDetailTestCase( TestCase ):
         self.assertEqual( status.HTTP_200_OK, get_response.status_code )
 
     def test_user_signed_as_another_user( self ):
+        """Ensure access denied to any user that is not the owner of account"""
+
         User.objects.create( username='zoro', password='123' )
         url = reverse( 'user_detail', args=['zoro'] )
         self.client.force_login( self.user )
 
-        response = self.client.get( url )
-        self.assertEqual( status.HTTP_403_FORBIDDEN, response.status_code )
+        get_response = self.client.get( url )
+        post_response = self.client.post( url )
+        put_response = self.client.put( url )
+        delete_response = self.client.delete( url )
+
+        self.assertEqual( status.HTTP_403_FORBIDDEN, get_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, put_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
 
     # PUT METHOD
     def test_valid_data_edit( self ):
