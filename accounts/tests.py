@@ -29,8 +29,15 @@ class UserDetailTestCase( TestCase ):
 
     def test_not_owner_or_not_a_team_member_access_forbidden( self ):
         pass
+
     def test_nonexistent_user( self ):
-        pass
+        """Ensure user not found if user doesn't exist"""
+        
+        url = reverse( 'user_detail', args=['not_a_user'] )
+        self.client.force_login( self.user )
+
+        response = self.client.get( url )
+        self.assertEqual( status.HTTP_404_NOT_FOUND, response.status_code )
 
     # GET METHOD 
     def test_valid_get_user_detail( self ):
