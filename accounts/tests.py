@@ -2,6 +2,7 @@ from rest_framework import status
 from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
+from .models import Team
 
 User = get_user_model()
 
@@ -9,6 +10,11 @@ class UserDetailTestCase( TestCase ):
     def setUp( self ):
         self.client = Client()
         self.user = User.objects.create( username='luffy', first_name='Monkey', last_name='D. Luffy', password='123' )
+        self.user2 = User.objects.create( username='zoro', first_name='Roronoa', last_name='Zoro', password='123' )
+        self.user3 = User.objects.create( username= 'ace', password='123' )
+        self.team = Team.objects.create_team( team_name='Straw Hat Pirates', captain=self.user )
+        self.team.members.add( self.user2 )
+
 
     def test_unauthenticated_user_forbidden( self ):
         """Ensure all methods deny unauthenticated user access"""
@@ -27,8 +33,25 @@ class UserDetailTestCase( TestCase ):
         self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, patch_response.status_code )
 
-    def test_not_owner_or_not_a_team_member_access_forbidden( self ):
-        pass
+    def test_not_a_team_member_access_forbidden( self ):
+        """Ensure access denied for each method to users not in team"""
+        
+        not_member = Client()
+        not_member.force_login( self.user3 )
+
+        url = reverse( 'user_detail', args=['luffy'] )
+
+        get_response = self.client.get( url )
+        post_response = self.client.post( url )
+        put_response = self.client.put( url )
+        delete_response = self.client.delete( url )
+        patch_response = self.client.patch( url )
+
+        self.assertEqual( status.HTTP_403_FORBIDDEN, get_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, put_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, patch_response.status_code )
 
     def test_nonexistent_user( self ):
         """Ensure status 404 if user doesn't exist"""
@@ -52,7 +75,6 @@ class UserDetailTestCase( TestCase ):
     def test_user_signed_as_another_user( self ):
         """Ensure access denied to any user that is not the owner of account"""
 
-        User.objects.create( username='zoro', password='123' )
         url = reverse( 'user_detail', args=['zoro'] )
         self.client.force_login( self.user )
 
@@ -61,7 +83,8 @@ class UserDetailTestCase( TestCase ):
         put_response = self.client.put( url )
         delete_response = self.client.delete( url )
 
-        self.assertEqual( status.HTTP_403_FORBIDDEN, get_response.status_code )
+        #Exception: they are on the same team
+        self.assertEqual( status.HTTP_200_OK, get_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, put_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
