@@ -49,8 +49,13 @@ class UserDetailTestCase( TestCase ):
         get_response = owner.get( url )
         self.assertEqual( status.HTTP_200_OK, get_response.status_code )
 
-    def test_get_user_signed_as_another_user( self ):
-        pass # forbidden
+    def test_user_signed_as_another_user( self ):
+        User.objects.create( username='zoro', password='123' )
+        url = reverse( 'user_detail', args=['zoro'] )
+        self.client.force_login( self.user )
+
+        response = self.client.get( url )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, response.status_code )
 
     # PUT METHOD
     def test_valid_data_edit( self ):
