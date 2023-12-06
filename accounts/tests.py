@@ -81,7 +81,10 @@ class UserDetailTestCase( TestCase ):
         self.assertEqual( serialized_data.data, response.json() )
 
     def test_user_signed_as_another_user( self ):
-        """Ensure access denied to any user that is not the owner of account"""
+        """
+        Ensure access denied to any user that is not the owner of account.
+        Get response is allowed if they are in the same team.
+        """
 
         url = reverse( 'user_detail', args=['zoro'] )
         self.client.force_login( self.luffy )
@@ -91,7 +94,6 @@ class UserDetailTestCase( TestCase ):
         put_response = self.client.put( url )
         delete_response = self.client.delete( url )
 
-        #Exception: they are on the same team
         self.assertEqual( status.HTTP_200_OK, get_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, put_response.status_code )
