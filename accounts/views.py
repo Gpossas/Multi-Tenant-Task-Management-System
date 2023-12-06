@@ -58,6 +58,9 @@ class UserDetail( APIView ):
         user = get_object_or_404( User, username=username )
         self.check_object_permissions( request, user )
 
+        if 'password' not in request.data:
+            return Response( { 'error': 'password field required' }, status=status.HTTP_400_BAD_REQUEST )
+
         deserialized_user = UserSerializer( user, data=request.data, partial=True )
         if deserialized_user.is_valid():
             deserialized_user.save()
