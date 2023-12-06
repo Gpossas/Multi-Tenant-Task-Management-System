@@ -136,6 +136,19 @@ class UserDetailTestCase( TestCase ):
         self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
     
     # POST METHOD
+    def test_valid_password_redefinition( self ):
+        """Ensure correct password redefinition"""
+
+        url = reverse( 'user_detail', args=['luffy'] )
+        self.client.force_login( self.luffy )
+
+        user = User.objects.get( username='luffy' )
+        previous_password = user.password
+
+        response = self.client.post( url, data={ 'password': '12345' }, content_type='application/json' )
+        self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
+        self.assertNotEqual( previous_password, user.password )
+
     def test_password_field_included( self ):
         """Ensure that the password field is passed through body"""
 
