@@ -19,7 +19,7 @@ class UserDetailTestCase( TestCase ):
         self.team.members.add( self.zoro )
         self.team.members.add( self.sanji )
 
-
+    # ALL METHODS
     def test_unauthenticated_user_forbidden( self ):
         """Ensure all methods deny unauthenticated user access"""
 
@@ -77,8 +77,13 @@ class UserDetailTestCase( TestCase ):
         response = owner.get( url )
         self.assertEqual( status.HTTP_200_OK, response.status_code )
 
-        serialized_data = UserSerializer( self.luffy )
-        self.assertEqual( serialized_data.data, response.json() )
+        response_data = response.json()
+        response_data.pop( 'id' )
+        self.assertEqual( response_data, {
+            "username": "luffy",
+            "first_name": "Monkey",
+            "last_name": "D. Luffy"
+        })
 
     def test_user_signed_as_another_user( self ):
         """
