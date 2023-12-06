@@ -158,3 +158,18 @@ class UserDetailTestCase( TestCase ):
 
         response = self.client.post( url, data={}, content_type='application/json' )
         self.assertEqual( status.HTTP_400_BAD_REQUEST, response.status_code )
+    
+    # DELETE METHOD
+    def test_valid_user_delete( self ):
+        url = reverse( 'user_detail', args=['luffy'] )
+        self.client.force_login( self.luffy )
+
+        response = self.client.put( url )
+        response_data = response.data
+        response_data.pop( 'id',  None )
+        self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
+        self.assertEqual( response_data, {
+            "username": "luffy",
+            "first_name": "Monkey",
+            "last_name": "D. Luffy"
+        })
