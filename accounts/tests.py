@@ -119,7 +119,9 @@ class UserDetailTestCase( TestCase ):
             "last_name": "D. Luffy"
         })
 
-    def test_edit_another_user_data( self ):
-        pass # forbidden
     def test_update_password_with_wrong_method( self ):
-        pass # forbidden
+        url = reverse( 'user_detail', args=['luffy'] )
+        self.client.force_login( self.luffy )
+
+        response = self.client.put( url, data={ 'password': 'not_allowed' }, content_type='application/json' )
+        self.assertEqual( status.HTTP_405_METHOD_NOT_ALLOWED, response.status_code )
