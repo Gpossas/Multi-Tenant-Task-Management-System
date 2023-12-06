@@ -66,6 +66,25 @@ class UserDetailTestCase( TestCase ):
 
         response = self.client.get( url )
         self.assertEqual( status.HTTP_404_NOT_FOUND, response.status_code )
+    
+    def test_user_signed_as_another_user( self ):
+        """
+        Ensure access denied to any user that is not the owner of account.
+        Get response is allowed if they are in the same team.
+        """
+
+        url = reverse( 'user_detail', args=['zoro'] )
+        self.client.force_login( self.luffy )
+
+        get_response = self.client.get( url )
+        post_response = self.client.post( url )
+        put_response = self.client.put( url )
+        delete_response = self.client.delete( url )
+
+        self.assertEqual( status.HTTP_200_OK, get_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, put_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
 
     # GET METHOD 
     def test_valid_get_user_detail( self ):
@@ -85,25 +104,6 @@ class UserDetailTestCase( TestCase ):
             "first_name": "Monkey",
             "last_name": "D. Luffy"
         })
-
-    def test_user_signed_as_another_user( self ):
-        """
-        Ensure access denied to any user that is not the owner of account.
-        Get response is allowed if they are in the same team.
-        """
-
-        url = reverse( 'user_detail', args=['zoro'] )
-        self.client.force_login( self.luffy )
-
-        get_response = self.client.get( url )
-        post_response = self.client.post( url )
-        put_response = self.client.put( url )
-        delete_response = self.client.delete( url )
-
-        self.assertEqual( status.HTTP_200_OK, get_response.status_code )
-        self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
-        self.assertEqual( status.HTTP_403_FORBIDDEN, put_response.status_code )
-        self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
 
     # PUT METHOD
     def test_valid_data_edit( self ):
