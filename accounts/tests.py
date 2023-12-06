@@ -144,12 +144,11 @@ class UserDetailTestCase( TestCase ):
         url = reverse( 'user_detail', args=['luffy'] )
         self.client.force_login( self.luffy )
 
-        user = User.objects.get( username='luffy' )
-        previous_password = user.password
+        previous_password = self.luffy.password
 
         response = self.client.post( url, data={ 'password': '12345' }, content_type='application/json' )
         self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
-        self.assertNotEqual( previous_password, user.password )
+        self.assertNotEqual( previous_password, User.objects.get( pk=self.luffy.pk ).password )
 
     def test_password_field_included( self ):
         """Ensure that the password field is passed through body"""
