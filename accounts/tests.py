@@ -3,7 +3,6 @@ from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from .models import Team
-from .serializers import UserSerializer
 
 User = get_user_model()
 
@@ -106,7 +105,20 @@ class UserDetailTestCase( TestCase ):
 
     # PUT METHOD
     def test_valid_data_edit( self ):
-        pass
+        """Ensure owner data edit"""
+
+        url = reverse( 'user_detail', args=['luffy'] )
+        self.client.force_login( self.luffy )
+
+        response = self.client.put( url, data={ 'first_name': 'Monki' }, content_type='application/json' )
+        response_data = response.json()
+        response_data.pop( 'id',  None )
+        self.assertEqual( response_data, {
+            "username": "luffy",
+            "first_name": "Monki",
+            "last_name": "D. Luffy"
+        })
+
     def test_edit_another_user_data( self ):
         pass # forbidden
     def test_update_password_with_wrong_method( self ):
