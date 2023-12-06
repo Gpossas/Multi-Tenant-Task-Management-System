@@ -9,10 +9,12 @@ User = get_user_model()
 class UserDetailTestCase( TestCase ):
     def setUp( self ):
         self.client = Client()
-        self.luffy = User.objects.create_user( username='luffy', first_name='Monkey', last_name='D. Luffy', password='123' )
-        self.zoro = User.objects.create_user( username='zoro', first_name='Roronoa', last_name='Zoro', password='123' )
-        self.sanji = User.objects.create_user( username='sanji', password='123' )
-        self.ace = User.objects.create_user( username= 'ace', password='123' )
+
+        self.password = '123'
+        self.luffy = User.objects.create_user( username='luffy', first_name='Monkey', last_name='D. Luffy', password=self.password )
+        self.zoro = User.objects.create_user( username='zoro', first_name='Roronoa', last_name='Zoro', password=self.password )
+        self.sanji = User.objects.create_user( username='sanji', password=self.password )
+        self.ace = User.objects.create_user( username= 'ace', password=self.password )
 
         self.team = Team.objects.create_team( team_name='Straw Hat Pirates', captain=self.luffy )
         self.team.members.add( self.zoro )
