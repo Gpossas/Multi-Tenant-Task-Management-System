@@ -126,9 +126,11 @@ class UserDetailTestCase( TestCase ):
         response = self.client.put( url, data={ 'password': 'not_allowed' }, content_type='application/json' )
         self.assertEqual( status.HTTP_405_METHOD_NOT_ALLOWED, response.status_code )
     
-    def test_put_unexistent_field( self ):
+    def test_put_nonexistent_field( self ):
+        """Non existent fields are ignored and don't return bad request"""
+
         url = reverse( 'user_detail', args=['luffy'] )
         self.client.force_login( self.luffy )
 
         response = self.client.put( url, data={ 'none_field': 'not_allowed' }, content_type='application/json' )
-        self.assertEqual( status.HTTP_400_BAD_REQUEST, response.status_code )
+        self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
