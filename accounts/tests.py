@@ -142,5 +142,5 @@ class UserDetailTestCase( TestCase ):
         url = reverse( 'user_detail', args=['luffy'] )
         self.client.force_login( self.luffy )
 
-        response = self.client.put( url, data={}, content_type='application/json' )
+        response = self.client.post( url, data={}, content_type='application/json' )
         self.assertEqual( status.HTTP_400_BAD_REQUEST, response.status_code )
