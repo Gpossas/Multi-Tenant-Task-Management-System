@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .permissions import IsInCommonTeam, IsUser, IsInTeam, IsReadOnly, IsCaptain, IsFirstMate
 from .models import Team, TeamMembership
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 User = get_user_model()
 
@@ -82,6 +83,7 @@ class UserDetail( APIView ):
 
 
 class TeamList( APIView ):
+    authentication_classes = ( JWTAuthentication, )
     permission_classes = ( IsAuthenticated, )
 
     def get( self, request ):
