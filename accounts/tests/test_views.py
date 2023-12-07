@@ -173,3 +173,23 @@ class UserDetailTestCase( TestCase ):
             "first_name": "Monkey",
             "last_name": "D. Luffy"
         })
+    
+
+class TeamListTest( TestCase ):
+    def setUp( self ):
+        self.client = Client()
+
+        self.luffy = User.objects.create_user( username='luffy', first_name='Monkey', last_name='D. Luffy', password='123' )
+        self.zoro = User.objects.create_user( username='zoro', first_name='Roronoa', last_name='Zoro', password='123' )
+        self.sanji = User.objects.create_user( username='sanji', password='123' )
+        self.team = Team.objects.create_team( team_name='Straw Hat Pirates', captain=self.luffy )
+        self.team.members.add( self.zoro )
+        self.team.members.add( self.sanji )
+
+        self.whitebeard = User.objects.create_user( username='pops', first_name='Edward', last_name='Newgate', password='123' )
+        self.ace = User.objects.create_user( username= 'ace', password='123' )
+        self.marco = User.objects.create_user( username= 'marco', password='123' )
+        self.team2 = Team.objects.create_team( team_name='Whitebeard Pirates', captain=self.whitebeard )
+        self.team2.members.add( self.ace )
+        self.team2.members.add( self.marco )
+        
