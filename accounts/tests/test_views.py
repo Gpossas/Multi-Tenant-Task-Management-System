@@ -52,7 +52,6 @@ class UserDetailTestCase( TestCase ):
         post_response = self.user.post( url )
         put_response = self.user.put( url )
         delete_response = self.user.delete( url )
-        patch_response = self.user.patch( url )
 
         self.assertEqual( status.HTTP_403_FORBIDDEN, get_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
