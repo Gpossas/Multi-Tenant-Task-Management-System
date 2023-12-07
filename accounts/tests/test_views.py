@@ -104,6 +104,7 @@ class UserDetailTestCase( TestCase ):
             "first_name": "Monkey",
             "last_name": "D. Luffy"
         })
+        self.assertNotIn( 'password', response.data )
 
     # PUT METHOD
     def test_valid_data_edit( self ):
