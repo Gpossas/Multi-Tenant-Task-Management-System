@@ -24,7 +24,7 @@ class UserDetailTestCase( TestCase ):
         self.team.members.add( self.sanji )
 
     # ALL METHODS
-    def test_unauthenticated_user_forbidden( self ):
+    def test_unauthenticated_user_denied( self ):
         """Ensure all methods deny unauthenticated user access"""
 
         url = reverse( 'user_detail', args=['luffy'] )
@@ -35,11 +35,11 @@ class UserDetailTestCase( TestCase ):
         delete_response = self.user.delete( url )
         patch_response = self.user.patch( url )
 
-        self.assertEqual( status.HTTP_403_FORBIDDEN, get_response.status_code )
-        self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
-        self.assertEqual( status.HTTP_403_FORBIDDEN, put_response.status_code )
-        self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
-        self.assertEqual( status.HTTP_403_FORBIDDEN, patch_response.status_code )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, get_response.status_code )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, post_response.status_code )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, put_response.status_code )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, delete_response.status_code )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, patch_response.status_code )
 
     def test_not_a_team_member_access_forbidden( self ):
         """Ensure access denied for each method to users not in team"""
