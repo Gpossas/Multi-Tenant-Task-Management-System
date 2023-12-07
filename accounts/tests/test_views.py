@@ -193,3 +193,11 @@ class TeamListTest( TestCase ):
         self.team2.members.add( self.ace )
         self.team2.members.add( self.marco )
         
+    def test_deny_user_unauthenticated( self ):
+        url = reverse( 'workspace' )
+
+        get_response = self.client.get( url )
+        post_response = self.client.post( url )
+
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, get_response.status_code )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, post_response.status_code )
