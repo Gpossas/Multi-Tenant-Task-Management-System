@@ -26,6 +26,7 @@ class CreateUser( APIView ):
 class UserDetail( APIView ):
     # IsInCommonTeamOrIsUser will block unauthenticated users as IsAuthenticated.
     # To save computational resources by not hitting the database, it's preferable to block unauthenticated users earlier.
+    authentication_classes = ( JWTAuthentication, )
     permission_classes = ( IsAuthenticated, IsUser|( IsReadOnly&IsInCommonTeam ) )
 
     def get( self, request, username ):
