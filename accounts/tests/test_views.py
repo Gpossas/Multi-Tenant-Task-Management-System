@@ -113,7 +113,7 @@ class UserDetailTestCase( TestCase ):
         url = reverse( 'user_detail', args=['luffy'] )
         self.user.force_authenticate( user=self.luffy )
 
-        response = self.user.put( url, data=json.dumps( { 'first_name': 'Monki' } ), content_type='application/json' )
+        response = self.user.put( url, data={ 'first_name': 'Monki' }, format='json' )
         response_data = response.json()
         response_data.pop( 'id',  None )
         self.assertEqual( response_data, {
@@ -126,7 +126,7 @@ class UserDetailTestCase( TestCase ):
         url = reverse( 'user_detail', args=['luffy'] )
         self.user.force_authenticate( user=self.luffy )
 
-        response = self.user.put( url, data=json.dumps( { 'password': 'not_allowed' } ), content_type='application/json' )
+        response = self.user.put( url, data={ 'password': 'not_allowed' }, format='json' )
         self.assertEqual( status.HTTP_405_METHOD_NOT_ALLOWED, response.status_code )
     
     def test_put_nonexistent_field( self ):
@@ -135,7 +135,7 @@ class UserDetailTestCase( TestCase ):
         url = reverse( 'user_detail', args=['luffy'] )
         self.user.force_authenticate( user=self.luffy )
 
-        response = self.user.put( url, data=json.dumps( { 'none_field': 'not_allowed' } ), content_type='application/json' )
+        response = self.user.put( url, data={ 'none_field': 'not_allowed' } , format='json' )
         self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
     
     # POST METHOD
@@ -147,7 +147,7 @@ class UserDetailTestCase( TestCase ):
 
         previous_password = self.luffy.password
 
-        response = self.user.post( url, data=json.dumps( { 'password': '12345' } ), content_type='application/json' )
+        response = self.user.post( url,data={ 'password': '12345' }, format='json' )
         self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
         self.assertNotEqual( previous_password, User.objects.get( pk=self.luffy.pk ).password )
 
@@ -157,7 +157,7 @@ class UserDetailTestCase( TestCase ):
         url = reverse( 'user_detail', args=['luffy'] )
         self.user.force_authenticate( user=self.luffy )
 
-        response = self.user.post( url, data={}, content_type='application/json' )
+        response = self.user.post( url, data={}, format='json' )
         self.assertEqual( status.HTTP_400_BAD_REQUEST, response.status_code )
     
     # DELETE METHOD
