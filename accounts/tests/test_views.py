@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from accounts.models import Team
+import unittest.mock as mock
 
 User = get_user_model()
 
@@ -202,3 +203,40 @@ class TeamListTest( TestCase ):
 
         self.assertEqual( status.HTTP_401_UNAUTHORIZED, get_response.status_code )
         self.assertEqual( status.HTTP_401_UNAUTHORIZED, post_response.status_code )
+    
+    def test_valid_user_teams( self ):
+        url = reverse( 'workspace' )
+
+        response = self.client.get( url )
+
+        self.assertEqual( response.data , 
+            {
+                "id": 1,
+                "name": "Straw Hat Pirates",
+                "members": [
+                    {
+                        "id": mock.ANY,
+                        "username": "luffy",
+                        "first_name": "Monkey",
+                        "last_name": "D. Luffy"
+                    },
+                    {
+                        "id": mock.ANY,
+                        "username": "sanji"
+                    },
+                    {
+                        "id": mock.ANY,
+                        "username": "nami",
+                        "first_name": "Senhorita",
+                        "last_name": "Nami"
+                    },
+                    {
+                        "id": mock.ANY,
+                        "username": "zoro",
+                        "first_name": "Roronoa",
+                        "last_name": "Zoro"
+                    }
+                ],
+                "created": mock.ANY
+            }
+        )
