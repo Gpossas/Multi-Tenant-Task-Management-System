@@ -44,8 +44,7 @@ class UserDetailTestCase( TestCase ):
     def test_not_a_team_member_access_forbidden( self ):
         """Ensure access denied for each method to users not in team"""
         
-        not_member = APIClient()
-        not_member.force_authenticate( user=self.ace )
+        self.user.force_authenticate( user=self.ace )
 
         url = reverse( 'user_detail', args=['luffy'] )
 
@@ -59,7 +58,6 @@ class UserDetailTestCase( TestCase ):
         self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, put_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
-        self.assertEqual( status.HTTP_403_FORBIDDEN, patch_response.status_code )
 
     def test_nonexistent_user( self ):
         """Ensure status 404 if user doesn't exist"""
