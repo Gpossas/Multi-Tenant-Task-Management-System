@@ -1,7 +1,7 @@
 import json
 from rest_framework import status
 from django.urls import reverse
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from accounts.models import Team
 import unittest.mock as mock
@@ -178,7 +178,7 @@ class UserDetailTestCase( TestCase ):
 
 class TeamListTest( TestCase ):
     def setUp( self ):
-        self.client = Client()
+        self.user = APIClient()
 
         self.luffy = User.objects.create_user( username='luffy', first_name='Monkey', last_name='D. Luffy', password='123' )
         self.zoro = User.objects.create_user( username='zoro', first_name='Roronoa', last_name='Zoro', password='123' )
@@ -197,8 +197,8 @@ class TeamListTest( TestCase ):
     def test_deny_user_unauthenticated( self ):
         url = reverse( 'workspace' )
 
-        get_response = self.client.get( url )
-        post_response = self.client.post( url )
+        get_response = self.user.get( url )
+        post_response = self.user.post( url )
 
         self.assertEqual( status.HTTP_401_UNAUTHORIZED, get_response.status_code )
         self.assertEqual( status.HTTP_401_UNAUTHORIZED, post_response.status_code )
@@ -206,7 +206,7 @@ class TeamListTest( TestCase ):
     def test_valid_user_teams( self ):
         url = reverse( 'workspace' )
 
-        response = self.client.get( url )
+        response = self.user.get( url )
 
         self.assertEqual( response.data , 
             {
