@@ -1,15 +1,17 @@
+import json
 from rest_framework import status
 from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from accounts.models import Team
 import unittest.mock as mock
+from rest_framework.test import APIClient
 
 User = get_user_model()
 
 class UserDetailTestCase( TestCase ):
     def setUp( self ):
-        self.client = Client()
+        self.user = APIClient()
 
         self.password = '123'
         self.luffy = User.objects.create_user( username='luffy', first_name='Monkey', last_name='D. Luffy', password=self.password )
@@ -27,11 +29,11 @@ class UserDetailTestCase( TestCase ):
 
         url = reverse( 'user_detail', args=['luffy'] )
 
-        get_response = self.client.get( url )
-        post_response = self.client.post( url )
-        put_response = self.client.put( url )
-        delete_response = self.client.delete( url )
-        patch_response = self.client.patch( url )
+        get_response = self.user.get( url )
+        post_response = self.user.post( url )
+        put_response = self.user.put( url )
+        delete_response = self.user.delete( url )
+        patch_response = self.user.patch( url )
 
         self.assertEqual( status.HTTP_403_FORBIDDEN, get_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
@@ -42,16 +44,16 @@ class UserDetailTestCase( TestCase ):
     def test_not_a_team_member_access_forbidden( self ):
         """Ensure access denied for each method to users not in team"""
         
-        not_member = Client()
-        not_member.force_login( self.ace )
+        not_member = APIClient()
+        not_member.force_authenticate( user=self.ace )
 
         url = reverse( 'user_detail', args=['luffy'] )
 
-        get_response = self.client.get( url )
-        post_response = self.client.post( url )
-        put_response = self.client.put( url )
-        delete_response = self.client.delete( url )
-        patch_response = self.client.patch( url )
+        get_response = self.user.get( url )
+        post_response = self.user.post( url )
+        put_response = self.user.put( url )
+        delete_response = self.user.delete( url )
+        patch_response = self.user.patch( url )
 
         self.assertEqual( status.HTTP_403_FORBIDDEN, get_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
@@ -63,9 +65,9 @@ class UserDetailTestCase( TestCase ):
         """Ensure status 404 if user doesn't exist"""
 
         url = reverse( 'user_detail', args=['not_a_user'] )
-        self.client.force_login( self.luffy )
+        self.user.force_authenticate( user=self.luffy )
 
-        response = self.client.get( url )
+        response = self.user.get( url )
         self.assertEqual( status.HTTP_404_NOT_FOUND, response.status_code )
     
     def test_user_signed_as_another_user( self ):
@@ -75,12 +77,12 @@ class UserDetailTestCase( TestCase ):
         """
 
         url = reverse( 'user_detail', args=['zoro'] )
-        self.client.force_login( self.luffy )
+        self.user.force_authenticate( user=self.luffy )
 
-        get_response = self.client.get( url )
-        post_response = self.client.post( url )
-        put_response = self.client.put( url )
-        delete_response = self.client.delete( url )
+        get_response = self.user.get( url )
+        post_response = self.user.post( url )
+        put_response = self.user.put( url )
+        delete_response = self.user.delete( url )
 
         self.assertEqual( status.HTTP_200_OK, get_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
@@ -91,8 +93,8 @@ class UserDetailTestCase( TestCase ):
     def test_valid_get_user_detail( self ):
         """Test valid access to owner account detail"""
 
-        owner = Client()
-        owner.force_login( self.luffy )
+        owner = APIClient()
+        owner.force_authenticate( user=self.luffy )
         url = reverse( 'user_detail', args=[self.luffy.username] )
         
         response = owner.get( url )
@@ -112,9 +114,9 @@ class UserDetailTestCase( TestCase ):
         """Ensure owner data edit"""
 
         url = reverse( 'user_detail', args=['luffy'] )
-        self.client.force_login( self.luffy )
+        self.user.force_authenticate( user=self.luffy )
 
-        response = self.client.put( url, data={ 'first_name': 'Monki' }, content_type='application/json' )
+        response = self.user.put( url, data=json.dumps( { 'first_name': 'Monki' } ), content_type='application/json' )
         response_data = response.json()
         response_data.pop( 'id',  None )
         self.assertEqual( response_data, {
@@ -125,18 +127,18 @@ class UserDetailTestCase( TestCase ):
 
     def test_update_password_with_wrong_method( self ):
         url = reverse( 'user_detail', args=['luffy'] )
-        self.client.force_login( self.luffy )
+        self.user.force_authenticate( user=self.luffy )
 
-        response = self.client.put( url, data={ 'password': 'not_allowed' }, content_type='application/json' )
+        response = self.user.put( url, data=json.dumps( { 'password': 'not_allowed' } ), content_type='application/json' )
         self.assertEqual( status.HTTP_405_METHOD_NOT_ALLOWED, response.status_code )
     
     def test_put_nonexistent_field( self ):
         """Non existent fields are ignored and don't return bad request"""
 
         url = reverse( 'user_detail', args=['luffy'] )
-        self.client.force_login( self.luffy )
+        self.user.force_authenticate( user=self.luffy )
 
-        response = self.client.put( url, data={ 'none_field': 'not_allowed' }, content_type='application/json' )
+        response = self.user.put( url, data=json.dumps( { 'none_field': 'not_allowed' } ), content_type='application/json' )
         self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
     
     # POST METHOD
@@ -144,11 +146,11 @@ class UserDetailTestCase( TestCase ):
         """Ensure correct password redefinition"""
 
         url = reverse( 'user_detail', args=['luffy'] )
-        self.client.force_login( self.luffy )
+        self.user.force_authenticate( user=self.luffy )
 
         previous_password = self.luffy.password
 
-        response = self.client.post( url, data={ 'password': '12345' }, content_type='application/json' )
+        response = self.user.post( url, data=json.dumps( { 'password': '12345' } ), content_type='application/json' )
         self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
         self.assertNotEqual( previous_password, User.objects.get( pk=self.luffy.pk ).password )
 
@@ -156,17 +158,17 @@ class UserDetailTestCase( TestCase ):
         """Ensure that the password field is passed through body"""
 
         url = reverse( 'user_detail', args=['luffy'] )
-        self.client.force_login( self.luffy )
+        self.user.force_authenticate( user=self.luffy )
 
-        response = self.client.post( url, data={}, content_type='application/json' )
+        response = self.user.post( url, data={}, content_type='application/json' )
         self.assertEqual( status.HTTP_400_BAD_REQUEST, response.status_code )
     
     # DELETE METHOD
     def test_valid_user_delete( self ):
         url = reverse( 'user_detail', args=['luffy'] )
-        self.client.force_login( self.luffy )
+        self.user.force_authenticate( user=self.luffy )
 
-        response = self.client.put( url )
+        response = self.user.put( url )
         response_data = response.data
         response_data.pop( 'id',  None )
         self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
