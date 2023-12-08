@@ -252,7 +252,9 @@ class TeamDetailTest( TestCase ):
         self.team = Team.objects.create_team( team_name='Straw Hat Pirates', captain=self.luffy )
         self.team.members.add( self.zoro )
         self.team.members.add( self.sanji )
-    
+
+        self.blackbeard = User.objects.create_user( username='blackbeard', first_name='Marshall', last_name='D. Teach', password='123' )
+        
     def test_access_denied_unauthenticated_user( self ):
         get_response = self.user.get( self.url )
         post_response = self.user.post( self.url )
@@ -262,3 +264,17 @@ class TeamDetailTest( TestCase ):
         self.assertEqual( status.HTTP_401_UNAUTHORIZED, post_response.status_code )
         self.assertEqual( status.HTTP_401_UNAUTHORIZED, patch_response.status_code )
         self.assertEqual( status.HTTP_401_UNAUTHORIZED, delete_response.status_code )
+    
+    def test_access_denied_user_not_in_team( self ):
+        """Ensure access denied for a user that is not from the team to get team data"""
+
+        self.user.force_authenticate( user=self.blackbeard )
+        
+        get_response = self.user.get( self.url )
+        post_response = self.user.post( self.url )
+        delete_response = self.user.delete( self.url )
+        patch_response = self.user.patch( self.url )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, get_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, patch_response.status_code )
