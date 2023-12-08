@@ -136,7 +136,7 @@ class TeamDetail( APIView ):
     
 
     def post( self, request, pk, slug ):
-        """Join a user to a team or add a member to the team ( must be captain or first mate )"""
+        """Join a team or add a member to the team ( must be captain or first mate )"""
 
         team = get_object_or_404( Team, pk=pk )
         self.check_object_permissions( request, team )
