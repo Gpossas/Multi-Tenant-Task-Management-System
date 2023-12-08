@@ -240,3 +240,25 @@ class TeamListTest( TestCase ):
 
         response = self.user.post( url, data={}, format='json' )
         self.assertEqual( status.HTTP_400_BAD_REQUEST, response.status_code )
+
+
+class TeamDetailTest( TestCase ):
+    def setUp( self ):
+        self.url = reverse( 'team_detail',  args=( '1', 'straw-hat-pirates' ) )
+        self.user = APIClient()
+        self.luffy = User.objects.create_user( username='luffy', first_name='Monkey', last_name='D. Luffy', password='123' )
+        self.zoro = User.objects.create_user( username='zoro', first_name='Roronoa', last_name='Zoro', password='123' )
+        self.sanji = User.objects.create_user( username='sanji', password='123' )
+        self.team = Team.objects.create_team( team_name='Straw Hat Pirates', captain=self.luffy )
+        self.team.members.add( self.zoro )
+        self.team.members.add( self.sanji )
+    
+    def test_access_denied_unauthenticated_user( self ):
+        get_response = self.user.get( self.url )
+        post_response = self.user.post( self.url )
+        patch_response = self.user.patch( self.url )
+        delete_response = self.user.delete( self.url )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, get_response.status_code )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, post_response.status_code )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, patch_response.status_code )
+        self.assertEqual( status.HTTP_401_UNAUTHORIZED, delete_response.status_code )
