@@ -96,10 +96,9 @@ class UserDetailTestCase( TestCase ):
         
         response = owner.get( url )
         self.assertEqual( status.HTTP_200_OK, response.status_code )
-
-        response_data = response.json()
-        response_data.pop( 'id' )
-        self.assertEqual( response_data, {
+    
+        self.assertEqual( response.data, {
+            "id": mock.ANY,
             "username": "luffy",
             "first_name": "Monkey",
             "last_name": "D. Luffy"
@@ -114,9 +113,8 @@ class UserDetailTestCase( TestCase ):
         self.user.force_authenticate( user=self.luffy )
 
         response = self.user.put( url, data={ 'first_name': 'Monki' }, format='json' )
-        response_data = response.json()
-        response_data.pop( 'id',  None )
-        self.assertEqual( response_data, {
+        self.assertEqual( response.data, {
+            "id": mock.ANY,
             "username": "luffy",
             "first_name": "Monki",
             "last_name": "D. Luffy"
@@ -166,10 +164,9 @@ class UserDetailTestCase( TestCase ):
         self.user.force_authenticate( user=self.luffy )
 
         response = self.user.put( url )
-        response_data = response.data
-        response_data.pop( 'id',  None )
         self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
-        self.assertEqual( response_data, {
+        self.assertEqual( response.data, {
+            "id": mock.ANY,
             "username": "luffy",
             "first_name": "Monkey",
             "last_name": "D. Luffy"
@@ -206,36 +203,32 @@ class TeamListTest( TestCase ):
     def test_valid_user_teams( self ):
         url = reverse( 'workspace' )
 
+        self.user.force_authenticate( user=self.luffy )
         response = self.user.get( url )
-
-        self.assertEqual( response.data , 
-            {
-                "id": 1,
-                "name": "Straw Hat Pirates",
-                "members": [
-                    {
-                        "id": mock.ANY,
-                        "username": "luffy",
-                        "first_name": "Monkey",
-                        "last_name": "D. Luffy"
-                    },
-                    {
-                        "id": mock.ANY,
-                        "username": "sanji"
-                    },
-                    {
-                        "id": mock.ANY,
-                        "username": "nami",
-                        "first_name": "Senhorita",
-                        "last_name": "Nami"
-                    },
-                    {
-                        "id": mock.ANY,
-                        "username": "zoro",
-                        "first_name": "Roronoa",
-                        "last_name": "Zoro"
-                    }
-                ],
-                "created": mock.ANY
-            }
+        self.assertEqual( response.data, 
+            [
+                {
+                    'id': 1, 
+                    'name': 'Straw Hat Pirates', 
+                    'members': [
+                        {
+                            'id': mock.ANY, 
+                            'username': 'luffy', 
+                            'first_name': 'Monkey', 
+                            'last_name': 'D. Luffy'
+                        }, 
+                        {
+                            'id': mock.ANY, 
+                            'username': 'zoro', 
+                            'first_name': 'Roronoa', 
+                            'last_name': 'Zoro'
+                        }, 
+                        {
+                            'id': mock.ANY, 
+                            'username': 'sanji'
+                        }
+                    ], 
+                    'created': mock.ANY
+                }
+            ]
         )
