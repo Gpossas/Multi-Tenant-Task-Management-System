@@ -232,3 +232,11 @@ class TeamListTest( TestCase ):
                 }
             ]
         )
+    
+    # POST METHOD
+    def test_team_name_required( self ):
+        url = reverse( 'workspace' )
+        self.user.force_authenticate( user=self.ace )
+
+        response = self.user.post( url, data={}, format='json' )
+        self.assertEqual( status.HTTP_400_BAD_REQUEST, response.status_code )
