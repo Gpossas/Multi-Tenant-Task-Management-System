@@ -111,6 +111,8 @@ class TeamList( APIView ):
 
 
 class TeamDetail( APIView ):
+    authentication_classes = ( JWTAuthentication, )
+    
     def get_permissions( self ):
         if self.request.method == 'POST':
             self.permission_classes = ( IsAuthenticated, IsInTeam, IsCaptain|IsFirstMate )
