@@ -280,7 +280,7 @@ class TeamDetailTest( TestCase ):
         self.assertEqual( status.HTTP_403_FORBIDDEN, patch_response.status_code )
     
     # POST METHOD
-    def test_access_denied_join_or_add_member( self ):
+    def test_access_denied_add_member( self ):
         # authenticated, but not a member of team
         self.user.force_authenticate( user=self.blackbeard )
         response = self.user.post( self.url )
