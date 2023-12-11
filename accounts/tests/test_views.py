@@ -290,3 +290,8 @@ class TeamDetailTest( TestCase ):
         self.user.force_authenticate( user=self.sanji )
         response = self.user.post( self.url )
         self.assertEqual( status.HTTP_403_FORBIDDEN, response.status_code )
+    
+    def test_access_denied_wrong_json( self ):
+        self.user.force_authenticate( user=self.luffy )
+        response = self.user.post( self.url, data={} )
+        self.assertEqual( status.HTTP_400_BAD_REQUEST, response.status_code )
