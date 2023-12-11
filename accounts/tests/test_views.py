@@ -313,3 +313,17 @@ class TeamDetailTest( TestCase ):
         self.user.force_authenticate( user=self.zoro )
         response = self.user.delete( self.url )
         self.assertEqual( status.HTTP_403_FORBIDDEN, response.status_code )
+    
+    # PATH METHOD
+    def test_valid_member_remove( self ):
+        # captain remove member
+        self.user.force_authenticate( user=self.luffy )
+        response = self.user.patch( self.url, data={ 'username': 'zoro' } )
+        self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
+        self.assertNotIn( self.zoro, self.team.members.all() )
+
+        # member leave team
+        self.user.force_authenticate( user=self.sanji )
+        response = self.user.patch( self.url, data={ 'username': 'sanji' } )
+        self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
+        self.assertNotIn( self.sanji, self.team.members.all() )
