@@ -327,3 +327,9 @@ class TeamDetailTest( TestCase ):
         response = self.user.patch( self.url, data={ 'username': 'sanji' } )
         self.assertEqual( status.HTTP_202_ACCEPTED, response.status_code )
         self.assertNotIn( self.sanji, self.team.members.all() )
+    
+    def test_denied_permission_remove_member( self ):
+        self.user.force_authenticate( user=self.zoro )
+        response = self.user.patch( self.url, data={ 'username': 'sanji' } )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, response.status_code )
+        self.assertIn( self.sanji, self.team.members.all() )
