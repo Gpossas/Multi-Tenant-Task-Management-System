@@ -69,10 +69,10 @@ class IsInTeamAndIsUserOrIsCaptainOrIsFirstMate( permissions.BasePermission ):
     message = 'must be captain or first mate to remove a member or be the member itself'
     def has_object_permission( self, request, view, user ): 
         team_pk = view.kwargs.get( 'pk' )
+        if not request.user.teams.filter( pk=team_pk ).exists():
+            self.message = 'team not found'
+            return False
         return bool( 
-            request.user.teams.filter( pk=team_pk ).exists()
-            and ( 
-                request.user == user 
-                or TeamMembership.objects.filter( team=team_pk, member=request.user.id, role__in=('C', 'FM') ).exists()
-             ) 
+            request.user == user 
+            or TeamMembership.objects.filter( team=team_pk, member=request.user.id, role__in=('C', 'FM') ).exists()
         )
