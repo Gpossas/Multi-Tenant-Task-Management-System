@@ -153,8 +153,13 @@ class TeamDetail( APIView ):
     def patch( self, request, pk, slug ):
         """Remove a member or leave a team"""
 
-        member_to_remove = get_object_or_404( User, username=request.data.get( 'username' ) )
         team = get_object_or_404( Team, pk=pk )
+        # Security: first check if user is in team before returning if user is in team or not
+        # or a user not in team would have access to what user is in team or not
+        try:
+            member_to_remove = User.objects.get( username=request.data.get( 'username' ) )
+        except User.DoesNotExist:
+            member_to_remove = None
         self.check_object_permissions( request, member_to_remove )
 
         serialized_member_to_remove = UserSerializer( member_to_remove )
