@@ -273,7 +273,7 @@ class TeamDetailTest( TestCase ):
         get_response = self.user.get( self.url )
         post_response = self.user.post( self.url )
         delete_response = self.user.delete( self.url )
-        patch_response = self.user.patch( self.url )
+        patch_response = self.user.patch( self.url, data={ 'username': 'zoro' } )
         self.assertEqual( status.HTTP_403_FORBIDDEN, get_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, post_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
