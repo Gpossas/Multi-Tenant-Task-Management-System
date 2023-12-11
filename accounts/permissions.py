@@ -72,6 +72,9 @@ class IsInTeamAndIsUserOrIsCaptainOrIsFirstMate( permissions.BasePermission ):
         if not request.user.teams.filter( pk=team_pk ).exists():
             self.message = 'must be in team to perform action'
             return False
+        if not user:
+            self.message = 'user not in team or does not exist'
+            return False
         return bool( 
             request.user == user 
             or TeamMembership.objects.filter( team=team_pk, member=request.user.id, role__in=('C', 'FM') ).exists()
