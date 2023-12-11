@@ -140,7 +140,10 @@ class TeamDetail( APIView ):
 
         team = get_object_or_404( Team, pk=pk )
         self.check_object_permissions( request, team )
-        new_member = get_object_or_404( User, username=request.data['username'] )
+
+        if not request.data.get( 'username' ):
+            return Response( { 'error': 'username field required' }, status=status.HTTP_400_BAD_REQUEST )
+        new_member = get_object_or_404( User, username=request.data.get( 'username' ) )
 
         team.members.add( new_member )
         serialized = TeamSerializer( team )
