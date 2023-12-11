@@ -70,7 +70,7 @@ class IsInTeamAndIsUserOrIsCaptainOrIsFirstMate( permissions.BasePermission ):
     def has_object_permission( self, request, view, user ): 
         team_pk = view.kwargs.get( 'pk' )
         if not request.user.teams.filter( pk=team_pk ).exists():
-            self.message = 'team not found'
+            self.message = 'must be in team to perform action'
             return False
         return bool( 
             request.user == user 
