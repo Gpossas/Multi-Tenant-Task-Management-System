@@ -295,3 +295,9 @@ class TeamDetailTest( TestCase ):
         self.user.force_authenticate( user=self.luffy )
         response = self.user.post( self.url, data={} )
         self.assertEqual( status.HTTP_400_BAD_REQUEST, response.status_code )
+    
+    # DELETE METHOD
+    def test_access_denied_not_captain_delete_team( self ):
+        self.user.force_authenticate( user=self.zoro )
+        response = self.user.delete( self.url )
+        self.assertEqual( status.HTTP_403_FORBIDDEN, response.status_code )
