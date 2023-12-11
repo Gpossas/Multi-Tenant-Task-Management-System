@@ -154,8 +154,8 @@ class TeamDetail( APIView ):
         """Remove a member or leave a team"""
 
         member_to_remove = get_object_or_404( User, username=request.data.get( 'username' ) )
-        self.check_object_permissions( request, member_to_remove )
         team = get_object_or_404( Team, pk=pk )
+        self.check_object_permissions( request, member_to_remove )
 
         serialized_member_to_remove = UserSerializer( member_to_remove )
         team.members.remove( member_to_remove )
