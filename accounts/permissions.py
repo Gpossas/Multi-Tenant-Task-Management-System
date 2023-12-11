@@ -36,7 +36,7 @@ class IsReadOnly( permissions.BasePermission ):
 class IsUser( permissions.BasePermission ):
     message = 'Must be the owner of the account to perform action'
     def has_object_permission( self, request, view, obj ):
-        return obj == request.user
+        return bool( obj == request.user )
 
 
 class IsInCommonTeam( permissions.BasePermission ):
@@ -45,33 +45,32 @@ class IsInCommonTeam( permissions.BasePermission ):
         my_teams = request.user.teams.all()
         requested_user_teams = obj.teams.all()
 
-        return my_teams.filter( pk__in=requested_user_teams.values_list( 'pk', flat=True ) ).exists()
+        return bool( my_teams.filter( pk__in=requested_user_teams.values_list( 'pk', flat=True ) ).exists() )
     
 
 class IsInTeam( permissions.BasePermission ):
     message = 'Must be in team to perform action'
     def has_object_permission( self, request, view, team ): 
-        user_teams = request.user.teams.all()
-        return user_teams.filter( name=team ).exists()
+        return bool( request.user.teams.filter( name=team ).exists() )
     
 
 class IsCaptain( permissions.BasePermission ):
     message = 'Must be captain to perform action'
     def has_object_permission( self, request, view, team ): 
-        return TeamMembership.objects.filter( team=team.id, member=request.user.id, role='C' ).exists()
+        return bool( TeamMembership.objects.filter( team=team.id, member=request.user.id, role='C' ).exists() )
 
 
 class IsFirstMate( permissions.BasePermission ):
     message = 'Must be First mate to perform action'
     def has_object_permission( self, request, view, team ): 
-        return TeamMembership.objects.filter( team=team.id, member=request.user.id, role='FM' ).exists()
+        return bool( TeamMembership.objects.filter( team=team.id, member=request.user.id, role='FM' ).exists() )
 
 class IsInTeamAndIsUserOrIsCaptainOrIsFirstMate( permissions.BasePermission ):
     message = 'must be captain or first mate to remove a member or be the member itself'
     def has_object_permission( self, request, view, user ): 
         team_pk = view.kwargs.get( 'pk' )
         return bool( 
-            request.user.teams.filter( pk=team_pk).exists()
+            request.user.teams.filter( pk=team_pk ).exists()
             and ( 
                 request.user == user 
                 or TeamMembership.objects.filter( team=team_pk, member=request.user.id, role__in=('C', 'FM') ).exists()
