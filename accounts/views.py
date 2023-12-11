@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from .permissions import IsInCommonTeam, IsUser, IsInTeam, IsReadOnly, IsCaptain, IsFirstMate
-from .models import Team, TeamMembership
+from .permissions import IsInCommonTeam, IsUser, IsInTeam, IsReadOnly, IsCaptain, IsFirstMate, IsInTeamAndIsUserOrIsCaptainOrIsFirstMate
+from .models import Team
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 User = get_user_model()
@@ -117,7 +117,7 @@ class TeamDetail( APIView ):
         if self.request.method == 'POST':
             self.permission_classes = ( IsAuthenticated, IsInTeam, IsCaptain|IsFirstMate )
         elif self.request.method == 'PATCH':
-            self.permission_classes = ( IsAuthenticated, IsInTeam )
+            self.permission_classes = ( IsAuthenticated, IsInTeamAndIsUserOrIsCaptainOrIsFirstMate )
         elif self.request.method == 'DELETE':
             self.permission_classes = ( IsAuthenticated, IsInTeam, IsCaptain )
         else:
@@ -154,18 +154,12 @@ class TeamDetail( APIView ):
         """Remove a member or leave a team"""
 
         member_to_remove = get_object_or_404( User, username=request.data.get( 'username' ) )
+        self.check_object_permissions( request, member_to_remove )
         team = get_object_or_404( Team, pk=pk )
-        if (
-            request.user == member_to_remove or
-            TeamMembership.objects.filter( team=team.id, member=request.user.id, role__in=('C', 'FM') ).exists()
-        ):
-            serialized_member_to_remove = UserSerializer( member_to_remove )
-            team.members.remove( member_to_remove )
-            return Response( serialized_member_to_remove.data, status=status.HTTP_202_ACCEPTED )
-        return Response( 
-            { 'error': 'must be captain or first mate to remove a member or be the member itself' },
-            status=status.HTTP_403_FORBIDDEN 
-        )
+
+        serialized_member_to_remove = UserSerializer( member_to_remove )
+        team.members.remove( member_to_remove )
+        return Response( serialized_member_to_remove.data, status=status.HTTP_202_ACCEPTED )
     
 
     def delete( self, request, pk, slug ):
