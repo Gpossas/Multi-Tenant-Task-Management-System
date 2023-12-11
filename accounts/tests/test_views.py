@@ -279,6 +279,18 @@ class TeamDetailTest( TestCase ):
         self.assertEqual( status.HTTP_403_FORBIDDEN, delete_response.status_code )
         self.assertEqual( status.HTTP_403_FORBIDDEN, patch_response.status_code )
     
+    def test_nonexistent_team( self ):
+        self.user.force_authenticate( user=self.luffy )
+        url = reverse( 'team_detail',  args=( '99', 'straw-hat-pirates' ) )
+        get_response = self.user.get( url )
+        post_response = self.user.post( url )
+        delete_response = self.user.delete( url )
+        patch_response = self.user.patch( url )
+        self.assertEqual( status.HTTP_404_NOT_FOUND, get_response.status_code )
+        self.assertEqual( status.HTTP_404_NOT_FOUND, post_response.status_code )
+        self.assertEqual( status.HTTP_404_NOT_FOUND, delete_response.status_code )
+        self.assertEqual( status.HTTP_404_NOT_FOUND, patch_response.status_code )
+    
     # POST METHOD
     def test_access_denied_add_member( self ):
         # authenticated, but not a member of team
